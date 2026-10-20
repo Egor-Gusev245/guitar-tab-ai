@@ -1,10 +1,10 @@
-# 🎸 AI Guitar Tab Transcriber (MVP)
+# AI Guitar Tab Transcriber (MVP)
 
 Веб-приложение для автоматического выделения гитарной дорожки из аудиозаписи (с помощью ИИ **Demucs**), распознавания нот и аккордов, генерации интерактивной гитарной табулатуры и удобного Личного кабинета пользователя.
 
 ---
 
-## 🌟 Основные возможности (MVP)
+## Основные возможности (MVP)
 
 1. **Разделение трека (Stem Separation)**:
    - Изоляция гитарной дорожки с помощью нейросети `Demucs` (модель `htdemucs_6s`, отделяющая гитару от баса, ударных и вокала).
@@ -20,7 +20,7 @@
 
 ---
 
-## 🏗 Архитектура проекта
+## Архитектура проекта
 
 ```text
 guitar-tab-ai/
@@ -46,47 +46,8 @@ guitar-tab-ai/
 └── README.md
 ```
 
----
 
-## 🚀 Быстрый старт (Разработка)
-
-### Требования
-- Python 3.10+
-- Node.js 18+
-- Git
-- FFmpeg (необходим для обработки аудио в Demucs)
-
-### 1. Клонирование репозитория
-```bash
-git clone <URL_РЕПОЗИТОРИЯ>
-cd guitar-tab-ai
-```
-
-### 2. Запуск Backend
-```bash
-cd backend
-python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
-
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-Документация API будет доступна по адресу: `http://localhost:8000/docs`.
-
-### 3. Запуск Frontend
-```bash
-cd ../frontend
-npm install
-npm run dev
-```
-Интерфейс будет доступен по адресу: `http://localhost:5173`.
-
----
-
-## 🗺 Дорожная карта (Roadmap)
+## Дорожная карта (Roadmap)
 
 - [x] Инициализация проекта и архитектурный план
 - [ ] Модуль аутентификации (JWT, регистрация, вход)
@@ -95,8 +56,3 @@ npm run dev
 - [ ] Конвертер нот в табулатуру (Fretboard mapper)
 - [ ] Интерактивный просмотрщик `alphaTab` в Личном кабинете
 - [ ] Экспорт в MusicXML / GPX
-
----
-
-## 📄 Лицензия
-MIT License
