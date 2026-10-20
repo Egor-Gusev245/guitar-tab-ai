@@ -1,19 +1,27 @@
-# ML Pipeline: Audio Separation & Transcription
+# ML Pipeline: Audio Separation & Transcription (Standard E)
 
-В этой папке располагаются модули обработки звука и генерации табулатур.
+Модули выделения гитарной дорожки из аудиозаписи и генерации гитарных табулатур в строе Standard E (E A D G B E).
 
-## Компоненты
-
+## Архитектура
 1. `demucs_runner.py`:
-   - Запуск Meta Demucs (`htdemucs_6s`) для извлечения отдельной гитарной дорожки (`guitar.wav`).
+   - Выделение партии гитары (`guitar.wav`) с помощью нейросети Meta Demucs (`htdemucs_6s`).
 2. `transcriber.py`:
-   - Детекция нот с помощью Spotify `basic-pitch` (извлечение нотных событий: pitch, onsets, offsets, velocities).
+   - Детекция высоты тона нот и моментов атак (Librosa pYIN + Onset Detection) в диапазоне 80 - 1350 Гц.
 3. `fretboard_mapper.py`:
-   - Алгоритм отображения MIDI-высот нот на 6 струн акустической/электрогитары (Standard E tuning: E2, A2, D3, G3, B3, E4) с оптимизацией расстояния руки по ладам (минимизация перемещений кисти).
-4. `exporters.py`:
-   - Генерация ASCII табулатуры (текстовый формат) и MusicXML для визуализации в библиотеке `alphaTab` на фронтенде.
+   - Алгоритм динамического программирования (Viterbi) для поиска эргономичной аппликатуры на грифе.
+4. `tab_formatter.py`:
+   - Генерация классической ASCII-табулатуры и JSON для веб-плеера (alphaTab).
+5. `pipeline.py`:
+   - Главная консольная точка входа.
 
-## Зависимости ML
+## Команды запуска
 ```bash
-pip install demucs basic-pitch torch torchaudio librosa
+# Тест на встроенном рифе:
+python pipeline.py --demo nothing_else_matters
+
+# Анализ песни (полный трек):
+python pipeline.py --input song.mp3
+
+# Анализ только гитары (без барабанов):
+python pipeline.py --input solo.wav --skip-demucs
 ```
