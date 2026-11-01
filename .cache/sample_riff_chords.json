@@ -1,0 +1,41 @@
+{
+  "file": "sample_riff.wav",
+  "duration": 2.6,
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 0.464,
+      "duration": 0.464,
+      "chord": "E",
+      "confidence": 0.598
+    },
+    {
+      "start": 0.464,
+      "end": 1.115,
+      "duration": 0.65,
+      "chord": "G",
+      "confidence": 0.594
+    },
+    {
+      "start": 1.115,
+      "end": 1.765,
+      "duration": 0.65,
+      "chord": "A",
+      "confidence": 0.578
+    },
+    {
+      "start": 1.765,
+      "end": 2.508,
+      "duration": 0.743,
+      "chord": "D",
+      "confidence": 0.635
+    },
+    {
+      "start": 2.508,
+      "end": 2.6,
+      "duration": 0.092,
+      "chord": "Dm",
+      "confidence": 0.531
+    }
+  ]
+}

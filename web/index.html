@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guitar AI Studio — Гармония, Стемы и Табулатуры</title>
+  <link rel="stylesheet" href="style.css?v=3.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">🎸</span>
+        <div class="logo-text">
+          <h1>Guitar AI Studio</h1>
+          <span class="badge">Harmony • Demucs Stems • Tabs MVP</span>
+        </div>
+      </div>
+
+      <div class="track-toolbar">
+        <label for="trackSelect" class="toolbar-label">Трек:</label>
+        <select id="trackSelect" class="select-input">
+          <option value="" disabled selected>Загрузка треков...</option>
+        </select>
+
+        <label class="btn btn-secondary upload-btn">
+          <span>📁 Загрузить песню</span>
+          <input type="file" id="audioUpload" accept="audio/*" style="display: none;">
+        </label>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- 1. Live Harmony Section -->
+      <section class="card harmony-card">
+        <div class="card-header">
+          <h2>Гармония трека (Аккорды в реальном времени)</h2>
+          <span class="chord-status" id="harmonyStatus">Анализ...</span>
+        </div>
+
+        <div class="harmony-display">
+          <div class="active-chord-box">
+            <span class="label">Текущий аккорд</span>
+            <div class="chord-badge" id="currentChord">—</div>
+            <div class="chord-confidence" id="chordConfidence">Ожидание...</div>
+          </div>
+
+          <div class="next-chord-box">
+            <span class="label">Следующий переход</span>
+            <div class="next-chord-name" id="nextChord">—</div>
+            <div class="next-chord-timer" id="nextChordTimer">в ожидании воспроизведения</div>
+          </div>
+
+          <div class="progression-strip-container">
+            <span class="label">Лента аккордов песни (кликните для перехода)</span>
+            <div class="progression-strip" id="progressionStrip">
+              <!-- Dynamically populated chord badges -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Stems Separation & Mixer Section (Play-Along / Karaoke Mode) -->
+      <section class="card stems-card">
+        <div class="stems-header">
+          <div>
+            <h2>Разделение на стемы (Demucs Play-Along)</h2>
+            <p class="subtitle">Отделите гитару от микса, чтобы включать минусовку и играть поверх песни с аккордами</p>
+          </div>
+          <span class="chord-status" id="stemsStatus">Проверка стемов...</span>
+        </div>
+
+        <!-- Banner when stems are not separated yet -->
+        <div id="stemsPrompt" class="stems-banner">
+          <div class="stems-banner-text">
+            <span>✨ Трек воспроизводится в стандартном режиме. Нажмите кнопку, чтобы Demucs разделил его на изолированную гитару и минусовку.</span>
+          </div>
+          <button id="btnSeparateStems" class="btn btn-primary">
+            <span id="stemsBtnIcon">🎛️</span>
+            <span id="stemsBtnText">Разделить на стемы (Demucs)</span>
+          </button>
+        </div>
+
+        <!-- Stem Mixer (Visible when separated) -->
+        <div id="stemsMixer" class="stems-mixer" style="display: none;">
+          <!-- Guitar Channel -->
+          <div class="mixer-channel" id="guitarChannel">
+            <div class="channel-top">
+              <div class="channel-title">
+                <span class="icon">🎸</span>
+                <span>Гитара (Guitar Stem)</span>
+              </div>
+              <span class="channel-tag" id="guitarStateText">Звучит</span>
+            </div>
+            <div class="channel-controls">
+              <button id="btnMuteGuitar" class="btn-mute">Выключить</button>
+              <div class="slider-group">
+                <input type="range" id="volGuitar" min="0" max="1" step="0.05" value="1.0">
+                <span class="volume-val" id="volGuitarVal">100%</span>
+              </div>
+            </div>
+            <div class="guitar-status-hint" id="guitarHint">Гитара включена: можно снимать табы</div>
+          </div>
+
+          <!-- Backing Track Channel -->
+          <div class="mixer-channel" id="noGuitarChannel">
+            <div class="channel-top">
+              <div class="channel-title">
+                <span class="icon">🥁</span>
+                <span>Минусовка (Без гитары: Бас + Барабаны + Вокал)</span>
+              </div>
+              <span class="channel-tag" id="noGuitarStateText">Звучит</span>
+            </div>
+            <div class="channel-controls">
+              <button id="btnMuteNoGuitar" class="btn-mute">Выключить</button>
+              <div class="slider-group">
+                <input type="range" id="volNoGuitar" min="0" max="1" step="0.05" value="1.0">
+                <span class="volume-val" id="volNoGuitarVal">100%</span>
+              </div>
+            </div>
+            <div class="guitar-status-hint" style="color:var(--accent-purple-light);">
+              Совет: заглушите гитару слева, чтобы играть под минус с показом аккордов!
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Waveform & Region Selector Section -->
+      <section class="card waveform-card">
+        <div class="waveform-header">
+          <div class="track-info">
+            <span class="track-name" id="currentTrackTitle">sample_song.wav</span>
+            <span class="time-display" id="timeDisplay">00:00.0 / 00:00.0</span>
+          </div>
+
+          <div class="snippet-indicators">
+            <span class="snippet-pill">
+              Выделен фрагмент: <strong id="regionTime">0.00s – 3.00s</strong> (<span id="regionDuration">3.00s</span>)
+            </span>
+          </div>
+        </div>
+
+        <!-- Interactive Waveform Canvas Container -->
+        <div class="waveform-wrapper" id="waveformWrapper">
+          <canvas id="waveformCanvas"></canvas>
+          <div id="selectionOverlay" class="selection-overlay">
+            <div class="handle handle-left" id="handleLeft"></div>
+            <div class="selection-label">Выбранный отрезок</div>
+            <div class="handle handle-right" id="handleRight"></div>
+          </div>
+          <div id="playhead" class="playhead"></div>
+        </div>
+
+        <!-- Playback Controls -->
+        <div class="controls-bar">
+          <div class="playback-buttons">
+            <button id="btnPlay" class="btn btn-primary btn-play">
+              <span id="playIcon">▶</span> <span id="playText">Играть</span>
+            </button>
+            <button id="btnLoopRegion" class="btn btn-secondary" title="Зациклить выбранный отрезок">
+              🔄 Петля A-B
+            </button>
+            <button id="btnResetRegion" class="btn btn-secondary" title="Сбросить выделение">
+              Выделить всё
+            </button>
+          </div>
+
+          <div class="playback-extra">
+            <label class="volume-control">
+              <span>Общая громкость:</span>
+              <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.9">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Tablature Generator Section -->
+      <section class="card tabs-card">
+        <div class="tabs-header">
+          <div class="tabs-title-group">
+            <h2>Генератор табулатур (Standard Tuning EADGBE)</h2>
+            <p class="subtitle">Выделите любой рифф или соло на аудиоволне и снимите табулатуру</p>
+          </div>
+
+          <div class="tab-options">
+            <label class="demucs-toggle" title="Изолировать партию гитары через Demucs AI перед распознаванием (убирает барабаны, бас и посторонние звуки)">
+              <input type="checkbox" id="chkDemucsTabs" checked>
+              <span>AI-фильтр гитары (Demucs)</span>
+            </label>
+
+            <div id="guitarMuteWarning" class="guitar-mute-warning" style="display: none;">
+              ⚠️ Гитара выключена (громкость 0%). Включите гитару в микшере выше, чтобы снять табы!
+            </div>
+
+            <button id="btnExtractTabs" class="btn btn-accent btn-large">
+              <span id="tabBtnIcon">⚡</span>
+              <span id="tabBtnText">Снять табы кусочка</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab Result Area -->
+        <div class="tabs-result-container">
+          <div class="tab-toolbar">
+            <span class="tab-info" id="tabStatus">Табулатура пока не сгенерирована</span>
+            <div class="tab-actions" id="tabActions" style="display: none;">
+              <button id="btnCopyTab" class="btn btn-small btn-secondary">📋 Скопировать</button>
+              <button id="btnDownloadTab" class="btn btn-small btn-secondary">💾 Сохранить .txt</button>
+            </div>
+          </div>
+
+          <div class="ascii-tab-viewer" id="tabViewer">
+            <pre id="asciiTabContent">e|----------------------------------------------------------|
+B|  Выделите фрагмент песни на аудиоволне выше                |
+G|  и нажмите «Снять табы кусочка»                          |
+D|----------------------------------------------------------|
+A|----------------------------------------------------------|
+E|----------------------------------------------------------|</pre>
+          </div>
+
+          <!-- Extracted Note Pills -->
+          <div class="detected-notes-summary" id="notesSummary" style="display: none;">
+            <span class="notes-label">Распознанные ноты (Basic Pitch):</span>
+            <div class="notes-chips" id="notesChips"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span>Guitar AI Studio • Facebook Demucs (htdemucs_6s) & Spotify Basic Pitch</span>
+    </footer>
+  </div>
+
+  <!-- Audio Elements -->
+  <audio id="audioElement" preload="auto"></audio>
+  <audio id="audioStemGuitar" preload="auto"></audio>
+  <audio id="audioStemNoGuitar" preload="auto"></audio>
+
+  <script src="app.js?v=3.0"></script>
+</body>
+</html>
